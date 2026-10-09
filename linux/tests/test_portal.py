@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 from gi.repository import GLib
-from powertoys_linux.desktop import ColorRequest
+from powertoys_linux.desktop import ColorRequest, ScreenshotRequest, screenshot_path
+from pathlib import Path
 
 
 class PortalTests(unittest.TestCase):
@@ -41,3 +42,27 @@ class PortalTests(unittest.TestCase):
         self.request.cancel()
         self.assertEqual(self.connection.call.call_args[0][3], "Close")
         self.callback.assert_called_once_with(None, "Color picking cancelled.")
+
+
+class ScreenshotTests(unittest.TestCase):
+    def test_interactive_capture_and_cleanup(self):
+        connection = Mock()
+        connection.get_unique_name.return_value = ":1.777"
+        connection.signal_subscribe.return_value = 55
+        callback = Mock()
+        with patch("powertoys_linux.desktop.Gio.bus_get_sync", return_value=connection):
+            request = ScreenshotRequest(callback)
+        self.addCleanup(request.cancel)
+        arguments = connection.call.call_args[0]
+        self.assertEqual(arguments[3], "Screenshot")
+        self.assertTrue(arguments[4].unpack()[1]["interactive"])
+        request.response(None, None, None, None, None, GLib.Variant("(ua{sv})", (0, {"uri": GLib.Variant("s", "file:///tmp/screen%20shot.png")})))
+        callback.assert_called_once_with(Path("/tmp/screen shot.png"), None)
+        connection.signal_unsubscribe.assert_called_once_with(55)
+        self.assertFalse(request.active)
+
+    def test_rejects_nonlocal_and_invalid_uris(self):
+        for uri in (None, "https://example.com/picture.png", "file://other-pc/tmp/a.png", "file:relative", "file:///tmp/a%00.png", "file:///tmp/a.png?query", "file:///tmp/a.png#fragment"):
+            with self.subTest(uri=uri), self.assertRaises(ValueError):
+                screenshot_path(uri)
+        self.assertEqual(screenshot_path("file://localhost/tmp/a.png"), Path("/tmp/a.png"))

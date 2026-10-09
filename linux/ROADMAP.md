@@ -14,7 +14,9 @@ implemented. Functionality and remaining differences are listed in README.md.
    rename, resize, local text transformations, session sleep inhibition.
 2. **Files and desktop services:** Peek, File Locksmith, New+, Color Picker and
    Workspaces application groups are implemented with the limits listed in
-   README.md. Remaining: OCR, file-manager actions, persistent module settings and shortcut
+   README.md. OCR image/capture controls and a local Tesseract adapter are
+   implemented; engine installation and real recognition validation are pending.
+   Remaining: file-manager actions, persistent module settings and shortcut
    registration through supported desktop interfaces.
 3. **Window and input tools:** GNOME 46 extension implements grid placement,
    pinning, cycling, move/resize and optional shortcuts, tested against native
@@ -42,7 +44,7 @@ implemented. Functionality and remaining differences are listed in README.md.
 | peek | UTF-8 and PNG/JPEG preview implemented; more viewers later | 2 |
 | FileLocksmith | Readable `/proc/*/fd` inspection implemented; process actions later | 2 |
 | NewPlus | File templates implemented; directory templates and file-manager actions later | 2 |
-| PowerOCR | Screenshot portal plus OCR engine; optional dependency approval | 2 |
+| PowerOCR | Image/screenshot input, crop and Tesseract adapter implemented; dependency approval and real-engine validation pending | 2 |
 | colorPicker | Screen-color portal and HEX/RGB implemented; history later | 2 |
 | Workspaces | Saved desktop app groups implemented; window restoration later | 2, 3 |
 | previewpane | Nautilus/Dolphin preview integration and thumbnail providers | 2 |

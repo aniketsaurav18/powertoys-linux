@@ -18,6 +18,16 @@ The optional GNOME window-control extension also uses the operating system's
 their source and license terms are supplied by the Linux distribution. Node.js
 is used only for development-time JavaScript syntax checks and tests.
 
+The experimental Linux Text Extractor has an optional adapter for a separately
+installed [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) executable
+and language models. Tesseract and the upstream
+[tessdata_fast models](https://github.com/tesseract-ocr/tessdata_fast) are licensed
+under Apache License 2.0. Its image-processing dependency
+[Leptonica](https://github.com/DanBloomberg/leptonica) uses a BSD-style license.
+No engine, models or native libraries are bundled or downloaded by the app or
+its installer. Consult the distribution packages' copyright files for the
+exact licenses and notices of the installed versions and their dependencies.
+
 - Color Picker
 - Command Palette
 - File Explorer Add-ins

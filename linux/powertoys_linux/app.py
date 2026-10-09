@@ -19,9 +19,10 @@ from .files import copy_template, open_file_processes, text_preview
 from .desktop import ColorRequest, color_formats
 from . import workspaces
 from .gnome_ui import GnomeViews
+from .ocr_ui import OcrViews
 
 
-class PowerToys(Gtk.Application, GnomeViews):
+class PowerToys(Gtk.Application, GnomeViews, OcrViews):
     def __init__(self, smoke_test=False, application_id="io.github.powertoys.Linux"):
         super().__init__(application_id=application_id, flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.smoke_test = smoke_test
@@ -39,6 +40,7 @@ class PowerToys(Gtk.Application, GnomeViews):
         self.template = None
         self.template_folder = None
         self.init_gnome()
+        self.init_ocr()
 
     def do_activate(self):
         if self.window is not None:
@@ -76,6 +78,7 @@ class PowerToys(Gtk.Application, GnomeViews):
         self.peek_page()
         self.locksmith_page()
         self.color_page()
+        self.ocr_page()
         self.newplus_page()
         self.workspace_page()
         self.window_tools_page()
@@ -370,7 +373,7 @@ class PowerToys(Gtk.Application, GnomeViews):
             self.status.set_text("Awake disabled.")
 
     def about_page(self):
-        self.page("about", "About this port", "This experimental Linux edition provides portable file/text tools and GNOME desktop tools. Full Windows feature parity remains in progress.\n\nThe GNOME 46 Window Tools extension supports zones, pinning, cycling, move/resize and optional shortcuts for native Wayland windows. Install and enable it after your next login.\n\nGNOME tools include theme scheduling, magnification, pointer preferences and shortcut discovery. Quick Accent offers a clipboard character picker.\n\nNext: OCR, file-manager integration, general keyboard remapping, capture overlays and system/network utilities. No telemetry or network services.\n\nSee linux/ROADMAP.md in the source repository for the full utility inventory.")
+        self.page("about", "About this port", "This experimental Linux edition provides portable file/text tools and GNOME desktop tools. Full Windows feature parity remains in progress.\n\nThe GNOME 46 Window Tools extension supports zones, pinning, cycling, move/resize and optional shortcuts for native Wayland windows. Install and enable it after your next login.\n\nGNOME tools include theme scheduling, magnification, pointer preferences and shortcut discovery. Quick Accent offers a clipboard character picker. Text Extractor has image/screenshot input and crop controls; it needs an optional Tesseract engine and language models.\n\nNext: file-manager integration, general keyboard remapping, capture overlays and system/network utilities. No telemetry or network services.\n\nSee linux/ROADMAP.md in the source repository for the full utility inventory.")
 
     def newplus_page(self):
         box = self.page("newplus", "New+", "Create a new file from a template. Select a regular file, choose a folder, and enter the new filename including its extension. Files are copied without overwriting existing names.")
@@ -593,16 +596,17 @@ class PowerToys(Gtk.Application, GnomeViews):
         return False
 
     def smoke_checks(self):
-        assert self.stack.get_children() and len(self.stack.get_children()) == 17
+        assert self.stack.get_children() and len(self.stack.get_children()) == 18
         self.text.get_buffer().set_text('{"linux":true}')
         self.convert_text()
         assert '"linux": true' in self.get_text()
         self.search.set_text("unlikely-application-name-1298765")
         self.filter_apps()
         assert not self.app_list.get_children()
-        print(f"GUI smoke test passed: 17 pages, text conversion, application search; {len(self.apps)} installed apps.", flush=True)
+        print(f"GUI smoke test passed: 18 pages, text conversion, application search; {len(self.apps)} installed apps.", flush=True)
 
     def do_shutdown(self):
+        self.close_ocr()
         self.stop_theme_schedule()
         if self.color_request:
             self.color_request.cancel()

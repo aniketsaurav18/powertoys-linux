@@ -18,6 +18,7 @@ This front end keeps its code and installation separate from those components.
 | Peek | UTF-8 text and PNG/JPEG preview | No global shortcut or document/video previews |
 | File Locksmith | Inspect readable process file descriptors by inode | No process termination; no mappings-only detection or elevated access |
 | Color Picker | Wayland-compatible desktop PickColor portal, HEX/RGB and clipboard | Requires a supported desktop portal; no history or global shortcut |
+| Text Extractor | Optional local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, installed-language selection, editable text and clipboard | Engine installation pending on this PC; no global shortcut, table reconstruction or click-word extraction |
 | New+ | Copy a template file into a chosen folder under a new name | No directory templates or file-manager context action |
 | Workspaces | Save and launch groups of installed desktop applications | No capture/restore of window positions or monitor layouts |
 | FancyZones | Choose a grid up to 6×6, preview zones, snap a selected window to a chosen monitor | GNOME 46 extension required; no drag overlay or saved custom layouts |
@@ -78,6 +79,17 @@ handling is unit-tested, and color picking is initiated only by the app button.
 Theme, zoom, cursor, drag-modifier and shortcut writes in the desktop test use
 an isolated in-memory GSettings backend, preserving your actual preferences.
 
+The OCR controls can be exercised without installing an engine:
+
+```sh
+./build.sh
+PYTHONPATH=. /usr/bin/python3 tests/ocr_gui.py build/ocr-preview.png
+```
+
+This uses a temporary CLI test double to check background work, crop selection,
+text rendering and the clipboard contract. It does **not** test recognition
+accuracy or replace Tesseract. The clipboard is mocked in this check.
+
 For native Wayland window integration, run:
 
 ```sh
@@ -103,6 +115,54 @@ This copies a snapshot to `$XDG_DATA_HOME/powertoys-linux` (by default
 Look for **PowerToys for Linux** in your application menu. No root access,
 startup entry or desktop shortcut settings are needed. Run installation again
 after updating the source to refresh the snapshot.
+
+## Optional OCR engine
+
+Open **Text Extractor**, choose **Open image…** or **Capture screen…**, drag over
+the preview if you want a smaller region, select a language and layout, then
+click **Extract text**. Review or edit the result before **Copy recognized
+text**. Capture uses your desktop's interactive Screenshot portal; the app
+temporarily hides itself and restores its window when the request finishes.
+The screenshot dialog and available capture modes are supplied by the desktop.
+Screenshot files belong to the portal and are not deleted by this app.
+
+Tesseract and at least one language model must be installed separately.
+The app and installer never fetch engine packages. The repository's dependency
+approval rule applies before introducing these optional third-party packages.
+On Ubuntu, after approval, an administrator can install `tesseract-ocr` and
+`tesseract-ocr-eng` using the distribution package manager.
+
+For this Ubuntu 24.04 x86-64 PC, a user-local alternative is to download the
+distribution packages `tesseract-ocr`, `libtesseract5`, `liblept5`,
+`tesseract-ocr-eng` and `tesseract-ocr-osd` with `apt download`, then extract
+them with `dpkg-deb --extract` into
+`${XDG_DATA_HOME:-~/.local/share}/powertoys-linux/ocr-runtime`.
+This is intended for the current PC, whose remaining shared libraries are
+already present, rather than a portable bundle for other distributions.
+It requires no root access and makes no system package changes.
+The adapter supplies that runtime's library and language paths only to its
+child process. A system `tesseract` on PATH takes precedence. Keep the
+extracted package copyright files in `usr/share/doc` with the runtime.
+
+Click **Refresh engine** after setup. Additional languages appear when their
+models are installed; combined language selections are not implemented.
+For a real English recognition check (also uses the existing system Cairo):
+
+```sh
+./build.sh
+PYTHONPATH=. /usr/bin/python3 tests/ocr_integration.py
+```
+
+Inputs are limited to PNG/JPEG, 50 MB and 20 megapixels. Recognition has a
+30-second limit, a 2 MB text limit and a Cancel button. Transparent pixels are
+composited onto white; rotated JPEGs are oriented before crop selection.
+Recognition uses a temporary copy and never writes to your original image.
+Small text, handwriting and complex layouts may produce poor results. The
+four layouts are automatic page, text block, single line and scattered text.
+All recognition stays local, with no cloud service or telemetry.
+
+See [Tesseract installation](https://tesseract-ocr.github.io/tessdoc/Installation.html)
+and [image quality guidance](https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html).
 
 ## GNOME window tools and global shortcuts
 

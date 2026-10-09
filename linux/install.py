@@ -23,7 +23,8 @@ def main():
     shutil.copytree(source / "powertoys_linux", destination / "powertoys_linux", dirs_exist_ok=True, ignore=shutil.ignore_patterns("__pycache__"))
     for name in ("launch.py", "README.md", "ROADMAP.md", "VALIDATION.md"):
         shutil.copy2(source / name, destination / name)
-    shutil.copy2(source.parent / "LICENSE", destination / "LICENSE")
+    for name in ("LICENSE", "NOTICE.md"):
+        shutil.copy2(source.parent / name, destination / name)
     command.parent.mkdir(parents=True, exist_ok=True)
     command.write_text(f'#!/bin/sh\nexec /usr/bin/python3 {shlex.quote(str(destination / "launch.py"))} "$@"\n')
     command.chmod(0o755)

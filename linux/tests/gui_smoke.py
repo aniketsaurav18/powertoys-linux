@@ -35,7 +35,7 @@ class DesktopTest(PowerToys):
         return False
 
     def checks(self):
-        assert len(self.stack.get_children()) == 17
+        assert len(self.stack.get_children()) == 18
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "photo.txt"
             path.write_text("Hello Linux")
@@ -126,7 +126,9 @@ class DesktopTest(PowerToys):
         assert self.preferences.get("windows", "mouse-button-modifier") == "<Alt>"
         self.search.set_text("")
         self.filter_apps()
-        print("Desktop tests passed: 17 pages; existing workflows; theme/schedule, zoom and pointer controls against in-memory settings; shortcuts and accents; GNOME suspend/display inhibitors and cleanup.", flush=True)
+        assert self.ocr_mode.get_active_text() == "Text block"
+        assert not self.ocr_start_button.get_sensitive()
+        print("Desktop tests passed: 18 pages; existing workflows; theme/schedule, zoom and pointer controls against in-memory settings; shortcuts and accents; OCR controls; GNOME suspend/display inhibitors and cleanup.", flush=True)
 
     def capture(self):
         try:
