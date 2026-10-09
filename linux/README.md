@@ -18,7 +18,7 @@ This front end keeps its code and installation separate from those components.
 | Peek | UTF-8 text and PNG/JPEG preview | No global shortcut or document/video previews |
 | File Locksmith | Inspect readable process file descriptors by inode | No process termination; no mappings-only detection or elevated access |
 | Color Picker | Wayland-compatible desktop PickColor portal, HEX/RGB and clipboard | Requires a supported desktop portal; no history or global shortcut |
-| Text Extractor | Local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, installed-language selection, editable text and clipboard | Optional engine required; no global shortcut, table reconstruction or click-word extraction |
+| Text Extractor | Local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, editable text and clipboard; GNOME shortcut for automatic screen-to-clipboard OCR | Optional engine required; native screenshot confirmation; no table reconstruction or click-word extraction |
 | New+ | Copy a template file into a chosen folder under a new name | No directory templates or file-manager context action |
 | Workspaces | Save and launch groups of installed desktop applications | No capture/restore of window positions or monitor layouts |
 | FancyZones | Choose a grid up to 6×6, preview zones, snap a selected window to a chosen monitor | GNOME 46 extension required; no drag overlay or saved custom layouts |
@@ -167,6 +167,61 @@ All recognition stays local, with no cloud service or telemetry.
 See [Tesseract installation](https://tesseract-ocr.github.io/tessdoc/Installation.html)
 and [image quality guidance](https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html).
 
+### Screen-to-clipboard shortcut
+
+On this PC, **Super + Shift + T** (Windows key + Shift + T) is registered as a
+GNOME custom shortcut. Press it, select **Area** in GNOME's screenshot overlay,
+drag around the text, then press **Enter** (or click the capture button).
+OCR runs in the background and copies non-empty recognized text automatically.
+A notification tells you when to paste with **Ctrl + V**. Press **Escape** in
+the selector to cancel. The main PowerToys window need not be open, and no
+window-tools extension or new login is required.
+
+On another installation, opt in with:
+
+```sh
+/usr/bin/python3 install.py --ocr-shortcut
+```
+
+The installer checks discoverable shortcut conflicts and preserves other GNOME
+custom bindings. Change or remove the binding on the **Text Extractor** page;
+use notation such as `<Super><Shift>t` or `<Control><Alt>F11`. Other programs'
+private bindings may not be discoverable. Registration is explicit: an ordinary
+installation does not add or change this shortcut.
+
+You can also start or stop the background helper from the Text Extractor page,
+or run these commands in your graphical session:
+
+```sh
+~/.local/bin/powertoys-linux --ocr
+~/.local/bin/powertoys-linux --stop-ocr
+```
+
+Shortcut OCR uses English if installed, otherwise the first installed language,
+with scattered-text recognition. Repeated triggers use one helper process;
+a trigger during an active job reports that extraction is already in progress.
+The helper briefly shows a copying window to obtain Wayland clipboard focus,
+then hides it and restores focus to the previous app. It stays running after
+copying so the text remains available to other applications. **Stop background
+Text Extractor** releases that owner; paste first. There is no login autostart.
+GNOME may save the selected screenshot in Pictures and initially put the image
+on its clipboard; successful OCR replaces it with recognized text. The app
+does not delete desktop-owned screenshots. Empty or failed recognition reports
+a notification and does not copy an empty string.
+
+For an isolated Wayland integration check:
+
+```sh
+./test-quick-ocr.sh
+```
+
+This starts a private headless GNOME session with temporary configuration and a
+virtual keyboard. A test portal supplies a selection image; real Tesseract
+recognizes it, a separate GTK process reads the real Wayland clipboard, and
+duplicate/repeated commands and Stop are checked. It leaves your clipboard and
+desktop settings unchanged. It does not simulate physical shortcut presses or
+interactively drag GNOME's real screenshot selector.
+
 ## GNOME window tools and global shortcuts
 
 ```sh
@@ -207,11 +262,13 @@ preference in place. Pinning/placement remain native window state after an
 extension is disabled. GNOME's drag gesture uses the chosen modifier plus the
 primary button to move, or the secondary button to resize.
 
-To uninstall, remove these three paths:
+Before uninstalling, remove the OCR shortcut and stop the background helper
+from the Text Extractor page. Then remove these paths:
 
 ```sh
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/powertoys-linux"
 rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/io.github.powertoys.Linux.desktop"
+rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/io.github.powertoys.Linux.TextExtractor.desktop"
 rm -f "$HOME/.local/bin/powertoys-linux"
 ```
 

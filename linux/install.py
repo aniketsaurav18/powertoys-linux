@@ -13,6 +13,7 @@ from pathlib import Path
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gnome-extension", action="store_true", help="Also install the GNOME 46 window-control extension (enable it in GNOME Extensions after login)")
+    parser.add_argument("--ocr-shortcut", action="store_true", help="Register Super+Shift+T for screen-to-clipboard OCR in GNOME (refuses detected conflicts)")
     options = parser.parse_args()
     source = Path(__file__).resolve().parent
     data = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
@@ -31,7 +32,14 @@ def main():
     desktop.parent.mkdir(parents=True, exist_ok=True)
     escaped = str(command).replace("\\", "\\\\").replace('"', '\\"').replace("`", "\\`").replace("$", "\\$").replace("%", "%%")
     desktop.write_text(f'[Desktop Entry]\nType=Application\nName=PowerToys for Linux\nComment=Experimental Linux productivity utilities\nExec="{escaped}"\nIcon=applications-utilities\nTerminal=false\nCategories=Utility;\nStartupNotify=true\nStartupWMClass=io.github.powertoys.Linux\n')
+    extractor = data / "applications/io.github.powertoys.Linux.TextExtractor.desktop"
+    extractor.write_text(f'[Desktop Entry]\nType=Application\nName=PowerToys Text Extractor\nComment=Screen-to-clipboard text recognition\nExec="{escaped}" --ocr\nIcon=edit-copy\nTerminal=false\nNoDisplay=true\nCategories=Utility;\n')
     print(f"Installed command: {command}\nInstalled application: {desktop}")
+    if options.ocr_shortcut:
+        from powertoys_linux.gnome_settings import GnomeSettings
+        from powertoys_linux.ocr_shortcut import OcrShortcut
+        binding = OcrShortcut(GnomeSettings(), command).save()
+        print(f"Registered GNOME Text Extractor shortcut: {binding}")
     if options.gnome_extension:
         extension = data / "gnome-shell/extensions/powertoys-linux@local"
         shutil.copytree(source / "gnome-extension/powertoys-linux@local", extension, dirs_exist_ok=True)

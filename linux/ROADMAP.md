@@ -16,7 +16,9 @@ implemented. Functionality and remaining differences are listed in README.md.
    Workspaces application groups are implemented with the limits listed in
    README.md. OCR image/capture controls and a local Tesseract adapter are
    implemented, with a user-local engine installed on this PC and real English
-   recognition validated. Interactive capture validation and advanced OCR modes
+   recognition validated. GNOME shortcut-driven capture with automatic
+   background recognition and clipboard delivery is implemented. Interactive
+   capture validation and advanced OCR modes
    such as table reconstruction remain.
    Remaining: file-manager actions, persistent module settings and shortcut
    registration through supported desktop interfaces.
@@ -46,7 +48,7 @@ implemented. Functionality and remaining differences are listed in README.md.
 | peek | UTF-8 and PNG/JPEG preview implemented; more viewers later | 2 |
 | FileLocksmith | Readable `/proc/*/fd` inspection implemented; process actions later | 2 |
 | NewPlus | File templates implemented; directory templates and file-manager actions later | 2 |
-| PowerOCR | Image/screenshot input, crop and local Tesseract OCR implemented; real English recognition validated; global shortcut and advanced extraction later | 2 |
+| PowerOCR | Image/screenshot input, crop, local Tesseract OCR and GNOME screen-to-clipboard shortcut implemented; advanced extraction later | 2 |
 | colorPicker | Screen-color portal and HEX/RGB implemented; history later | 2 |
 | Workspaces | Saved desktop app groups implemented; window restoration later | 2, 3 |
 | previewpane | Nautilus/Dolphin preview integration and thumbnail providers | 2 |

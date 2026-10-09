@@ -616,8 +616,11 @@ class PowerToys(Gtk.Application, GnomeViews, OcrViews):
 
 
 def main():
+    if sys.argv[1:] in (["--ocr"], ["--stop-ocr"]):
+        from .quick_ocr import main as quick_main
+        return quick_main(sys.argv[1:])
     if sys.argv[1:] not in ([], ["--smoke-test"]):
-        print("Usage: powertoys-linux [--smoke-test]", file=sys.stderr)
+        print("Usage: powertoys-linux [--smoke-test | --ocr | --stop-ocr]", file=sys.stderr)
         return 2
     if not Gtk.init_check()[0]:
         print("No graphical desktop available. Run powertoys-linux from your desktop session.", file=sys.stderr)

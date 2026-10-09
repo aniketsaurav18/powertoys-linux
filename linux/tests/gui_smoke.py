@@ -128,6 +128,9 @@ class DesktopTest(PowerToys):
         self.filter_apps()
         assert self.ocr_mode.get_active_text() == "Text block"
         assert not self.ocr_start_button.get_sensitive()
+        self.ocr_shortcut_entry.set_text("<Super><Control>F11")
+        self.ocr_save_shortcut()
+        self.ocr_remove_shortcut()
         print("Desktop tests passed: 18 pages; existing workflows; theme/schedule, zoom and pointer controls against in-memory settings; shortcuts and accents; OCR controls; GNOME suspend/display inhibitors and cleanup.", flush=True)
 
     def capture(self):

@@ -3,11 +3,13 @@
 """Native image, crop and text controls for the optional OCR backend."""
 
 import threading
+from pathlib import Path
 
-from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
+from gi.repository import Gdk, GdkPixbuf, Gio, GLib, Gtk
 
 from . import ocr
 from .desktop import ScreenshotRequest
+from .ocr_shortcut import DEFAULT_BINDING, OcrShortcut
 
 
 class OcrViews:
@@ -63,6 +65,21 @@ class OcrViews:
         scroll.add(self.ocr_text)
         box.pack_start(scroll, True, True, 0)
         self.button(box, "Copy recognized text", self.ocr_copy)
+        label = Gtk.Label(label="Screen-to-clipboard shortcut: select an area, confirm with Enter, then OCR copies the text automatically.", xalign=0)
+        label.set_line_wrap(True)
+        box.pack_start(label, False, False, 0)
+        row = Gtk.Box(spacing=10)
+        box.pack_start(row, False, False, 0)
+        self.ocr_shortcut_entry = Gtk.Entry(placeholder_text="<Super><Shift>t")
+        row.pack_start(self.ocr_shortcut_entry, True, True, 0)
+        self.button(row, "Save shortcut", self.ocr_save_shortcut)
+        self.button(row, "Remove shortcut", self.ocr_remove_shortcut)
+        self.button(box, "Select screen area and copy text…", self.ocr_quick_capture)
+        self.button(box, "Stop background Text Extractor", self.ocr_stop_background)
+        try:
+            self.ocr_shortcut_entry.set_text(OcrShortcut(self.preferences).read() or DEFAULT_BINDING)
+        except (RuntimeError, ValueError):
+            self.ocr_shortcut_entry.set_text(DEFAULT_BINDING)
         self.ocr_controls()
         GLib.idle_add(self.ocr_refresh)
 
@@ -269,3 +286,26 @@ class OcrViews:
         self.ocr_cancel.set()
         if self.ocr_request:
             self.ocr_request.cancel()
+
+    def ocr_save_shortcut(self):
+        binding = OcrShortcut(self.preferences).save(self.ocr_shortcut_entry.get_text())
+        self.ocr_shortcut_entry.set_text(binding)
+        self.status.set_text("Screen-to-clipboard shortcut saved. Select an area and press Enter; OCR copies the text automatically.")
+
+    def ocr_remove_shortcut(self):
+        OcrShortcut(self.preferences).remove()
+        self.status.set_text("Screen-to-clipboard shortcut removed.")
+
+    def ocr_background_command(self, argument):
+        executable = Path.home() / ".local/bin/powertoys-linux"
+        if not executable.is_file():
+            raise RuntimeError("Install PowerToys for this user first.")
+        Gio.Subprocess.new([str(executable), argument], Gio.SubprocessFlags.NONE)
+
+    def ocr_quick_capture(self):
+        self.ocr_background_command("--ocr")
+        self.status.set_text("Select a screen area and press Enter. Recognized text will be copied automatically.")
+
+    def ocr_stop_background(self):
+        self.ocr_background_command("--stop-ocr")
+        self.status.set_text("Background Text Extractor stopped.")
