@@ -2,6 +2,15 @@
 
 This software incorporates material from third parties.
 
+The experimental Linux front end in `linux/` uses the operating system's
+PyGObject, GTK 3, GLib/GIO and GdkPixbuf runtime. These libraries are not bundled
+or downloaded by this repository. They are distributed by the Linux vendor
+under LGPL licenses; see the installed packages' copyright files and the
+[PyGObject](https://pygobject.gnome.org/), [GTK](https://www.gtk.org/),
+[GLib](https://gitlab.gnome.org/GNOME/glib), and
+[GdkPixbuf](https://gitlab.gnome.org/GNOME/gdk-pixbuf) projects for source and
+license information.
+
 - Color Picker
 - Command Palette
 - File Explorer Add-ins
