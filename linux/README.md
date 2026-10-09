@@ -18,7 +18,7 @@ This front end keeps its code and installation separate from those components.
 | Peek | UTF-8 text and PNG/JPEG preview | No global shortcut or document/video previews |
 | File Locksmith | Inspect readable process file descriptors by inode | No process termination; no mappings-only detection or elevated access |
 | Color Picker | Wayland-compatible desktop PickColor portal, HEX/RGB and clipboard | Requires a supported desktop portal; no history or global shortcut |
-| Text Extractor | Optional local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, installed-language selection, editable text and clipboard | Engine installation pending on this PC; no global shortcut, table reconstruction or click-word extraction |
+| Text Extractor | Local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, installed-language selection, editable text and clipboard | Optional engine required; no global shortcut, table reconstruction or click-word extraction |
 | New+ | Copy a template file into a chosen folder under a new name | No directory templates or file-manager context action |
 | Workspaces | Save and launch groups of installed desktop applications | No capture/restore of window positions or monitor layouts |
 | FancyZones | Choose a grid up to 6×6, preview zones, snap a selected window to a chosen monitor | GNOME 46 extension required; no drag overlay or saved custom layouts |
@@ -127,6 +127,9 @@ The screenshot dialog and available capture modes are supplied by the desktop.
 Screenshot files belong to the portal and are not deleted by this app.
 
 Tesseract and at least one language model must be installed separately.
+On this PC, Tesseract 5.3.4, English models and orientation data are installed
+in the user-local runtime described below, using approximately 22 MB.
+Real English recognition has passed both backend and installed GTK app checks.
 The app and installer never fetch engine packages. The repository's dependency
 approval rule applies before introducing these optional third-party packages.
 On Ubuntu, after approval, an administrator can install `tesseract-ocr` and
