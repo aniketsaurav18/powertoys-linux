@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="io.github.powertoys.Linux.WindowTools" path="/io/github/powertoys/linux/windowtools/">
+    <key name="powertoys-cycle-next" type="as"><default>[]</default><summary>Cycle to next window</summary></key>
+    <key name="powertoys-toggle-above" type="as"><default>[]</default><summary>Pin or unpin focused window</summary></key>
+    <key name="powertoys-snap-left" type="as"><default>[]</default><summary>Snap focused window to left half</summary></key>
+    <key name="powertoys-snap-right" type="as"><default>[]</default><summary>Snap focused window to right half</summary></key>
+    <key name="powertoys-launcher" type="as"><default>[]</default><summary>Open PowerToys for Linux</summary></key>
+  </schema>
+</schemalist>

@@ -11,6 +11,13 @@ under LGPL licenses; see the installed packages' copyright files and the
 [GdkPixbuf](https://gitlab.gnome.org/GNOME/gdk-pixbuf) projects for source and
 license information.
 
+The optional GNOME window-control extension also uses the operating system's
+[GNOME Shell](https://gitlab.gnome.org/GNOME/gnome-shell),
+[Mutter](https://gitlab.gnome.org/GNOME/mutter), and
+[GJS](https://gitlab.gnome.org/GNOME/gjs) runtime. These components are not bundled;
+their source and license terms are supplied by the Linux distribution. Node.js
+is used only for development-time JavaScript syntax checks and tests.
+
 - Color Picker
 - Command Palette
 - File Explorer Add-ins

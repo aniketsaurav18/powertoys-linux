@@ -18,11 +18,12 @@ from .images import resize_image
 from .files import copy_template, open_file_processes, text_preview
 from .desktop import ColorRequest, color_formats
 from . import workspaces
+from .gnome_ui import GnomeViews
 
 
-class PowerToys(Gtk.Application):
-    def __init__(self, smoke_test=False):
-        super().__init__(application_id="io.github.powertoys.Linux", flags=Gio.ApplicationFlags.FLAGS_NONE)
+class PowerToys(Gtk.Application, GnomeViews):
+    def __init__(self, smoke_test=False, application_id="io.github.powertoys.Linux"):
+        super().__init__(application_id=application_id, flags=Gio.ApplicationFlags.FLAGS_NONE)
         self.smoke_test = smoke_test
         self.smoke_failed = False
         self.window = None
@@ -37,6 +38,7 @@ class PowerToys(Gtk.Application):
         self.workspace_config = workspaces.config_path()
         self.template = None
         self.template_folder = None
+        self.init_gnome()
 
     def do_activate(self):
         if self.window is not None:
@@ -44,7 +46,7 @@ class PowerToys(Gtk.Application):
             return
         self.window = Gtk.ApplicationWindow(application=self, title="PowerToys for Linux · Experimental")
         self.window.set_default_size(1020, 760)
-        header = Gtk.HeaderBar(title="PowerToys for Linux", subtitle="Experimental Linux edition · Stages 1–2")
+        header = Gtk.HeaderBar(title="PowerToys for Linux", subtitle="Experimental Linux edition · GNOME tools")
         header.set_show_close_button(True)
         self.window.set_titlebar(header)
         layout = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
@@ -54,7 +56,10 @@ class PowerToys(Gtk.Application):
         self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
         sidebar = Gtk.StackSidebar(stack=self.stack)
         sidebar.set_size_request(190, -1)
-        content.pack_start(sidebar, False, False, 0)
+        sidebar_scroll = Gtk.ScrolledWindow()
+        sidebar_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sidebar_scroll.add(sidebar)
+        content.pack_start(sidebar_scroll, False, False, 0)
         content.pack_start(self.stack, True, True, 0)
         self.status = Gtk.Label(label="Ready", xalign=0)
         self.status.set_margin_start(20)
@@ -73,6 +78,12 @@ class PowerToys(Gtk.Application):
         self.color_page()
         self.newplus_page()
         self.workspace_page()
+        self.window_tools_page()
+        self.lightswitch_page()
+        self.zoom_page()
+        self.mouse_page()
+        self.shortcut_page()
+        self.accent_page()
         self.about_page()
         self.window.show_all()
         if self.smoke_test:
@@ -359,7 +370,7 @@ class PowerToys(Gtk.Application):
             self.status.set_text("Awake disabled.")
 
     def about_page(self):
-        self.page("about", "About this port", "This experimental Linux edition implements ten PowerToys workflows across stages 1 and 2. Full Windows feature parity remains in progress.\n\nRuns natively on GNOME Wayland or X11 with Python 3 and GTK 3. No telemetry or network services.\n\nNext: OCR and file-manager integration. Window layouts, global keyboard tools and overlays require compositor-specific backends.\n\nThe Windows source, settings and build remain separate. See linux/ROADMAP.md in the source repository for the full utility inventory.")
+        self.page("about", "About this port", "This experimental Linux edition provides portable file/text tools and GNOME desktop tools. Full Windows feature parity remains in progress.\n\nThe GNOME 46 Window Tools extension supports zones, pinning, cycling, move/resize and optional shortcuts for native Wayland windows. Install and enable it after your next login.\n\nGNOME tools include theme scheduling, magnification, pointer preferences and shortcut discovery. Quick Accent offers a clipboard character picker.\n\nNext: OCR, file-manager integration, general keyboard remapping, capture overlays and system/network utilities. No telemetry or network services.\n\nSee linux/ROADMAP.md in the source repository for the full utility inventory.")
 
     def newplus_page(self):
         box = self.page("newplus", "New+", "Create a new file from a template. Select a regular file, choose a folder, and enter the new filename including its extension. Files are copied without overwriting existing names.")
@@ -582,16 +593,17 @@ class PowerToys(Gtk.Application):
         return False
 
     def smoke_checks(self):
-        assert self.stack.get_children() and len(self.stack.get_children()) == 11
+        assert self.stack.get_children() and len(self.stack.get_children()) == 17
         self.text.get_buffer().set_text('{"linux":true}')
         self.convert_text()
         assert '"linux": true' in self.get_text()
         self.search.set_text("unlikely-application-name-1298765")
         self.filter_apps()
         assert not self.app_list.get_children()
-        print(f"GUI smoke test passed: 11 pages, text conversion, application search; {len(self.apps)} installed apps.", flush=True)
+        print(f"GUI smoke test passed: 17 pages, text conversion, application search; {len(self.apps)} installed apps.", flush=True)
 
     def do_shutdown(self):
+        self.stop_theme_schedule()
         if self.color_request:
             self.color_request.cancel()
         self.stop_awake()

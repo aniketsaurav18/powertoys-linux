@@ -9,12 +9,14 @@ import traceback
 from pathlib import Path
 
 from powertoys_linux.app import PowerToys
+from powertoys_linux.gnome_settings import GnomeSettings
 from gi.repository import Gio, GLib
 
 
 class DesktopTest(PowerToys):
     def __init__(self):
-        super().__init__()
+        super().__init__(application_id="io.github.powertoys.Linux.DesktopTest")
+        self.preferences = GnomeSettings(Gio.memory_settings_backend_new())
         self.failed = False
 
     def do_activate(self):
@@ -24,7 +26,7 @@ class DesktopTest(PowerToys):
     def run_checks(self):
         try:
             self.checks()
-            self.stack.set_visible_child_name("rename")
+            self.stack.set_visible_child_name("lightswitch")
             GLib.timeout_add(500, self.capture)
         except Exception:
             traceback.print_exc()
@@ -33,7 +35,7 @@ class DesktopTest(PowerToys):
         return False
 
     def checks(self):
-        assert len(self.stack.get_children()) == 11
+        assert len(self.stack.get_children()) == 17
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "photo.txt"
             path.write_text("Hello Linux")
@@ -92,9 +94,39 @@ class DesktopTest(PowerToys):
         assert all(flags == 12 for path, flags in ours())
         self.stop_awake()
         self.keep_display.set_active(False)
+        self.theme_choice.set_active_id("prefer-dark")
+        self.apply_theme()
+        assert self.preferences.get("interface", "color-scheme") == "prefer-dark"
+        self.start_theme_schedule()
+        assert self.theme_timer
+        self.stop_theme_schedule()
+        assert not self.theme_timer
+        self.set_zoom(True)
+        assert self.preferences.get("accessibility", "screen-magnifier-enabled")
+        self.set_zoom(False)
+        self.cursor_size.set_value(48)
+        self.locate_pointer.set_active(True)
+        self.apply_mouse()
+        assert self.preferences.get("interface", "cursor-size") == 48
+        assert len(self.shortcut_store) > 0
+        assert self.accent_grid.get_children()
+        self.window_shortcut_entries["powertoys-cycle-next"].set_text("<Super><Control>F9")
+        self.save_window_shortcuts()
+        self.read_window_shortcuts()
+        assert "F9" in self.window_shortcut_entries["powertoys-cycle-next"].get_text()
+        self.window_shortcut_entries["powertoys-toggle-above"].set_text("<Super><Control>F9")
+        try:
+            self.save_window_shortcuts()
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Duplicate global shortcut accepted")
+        self.drag_modifier.set_active_id("<Alt>")
+        self.apply_drag_modifier()
+        assert self.preferences.get("windows", "mouse-button-modifier") == "<Alt>"
         self.search.set_text("")
         self.filter_apps()
-        print("Desktop tests passed: 11 pages; rename preview/apply/undo; Peek; New+; workspace save/delete; color formats; text; search and GIO launch; GNOME suspend/display inhibitors and cleanup.", flush=True)
+        print("Desktop tests passed: 17 pages; existing workflows; theme/schedule, zoom and pointer controls against in-memory settings; shortcuts and accents; GNOME suspend/display inhibitors and cleanup.", flush=True)
 
     def capture(self):
         try:

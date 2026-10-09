@@ -5,6 +5,8 @@ Stage 1 and five stage-2 workflows are runnable. The inventory below identifies
 which functionality is implemented and which still needs a Linux backend.
 Existing Windows source remains the behavior reference. The Linux implementation
 does not share the Windows JSON/IPC contracts or change their schemas.
+The GNOME 46 compositor backend and several stage-3/4 desktop workflows are now
+implemented. Functionality and remaining differences are listed in README.md.
 
 ## Stages
 
@@ -14,10 +16,12 @@ does not share the Windows JSON/IPC contracts or change their schemas.
    Workspaces application groups are implemented with the limits listed in
    README.md. Remaining: OCR, file-manager actions, persistent module settings and shortcut
    registration through supported desktop interfaces.
-3. **Window and input tools:** a compositor abstraction with separately tested
-   GNOME, KDE, wlroots and X11 implementations. Start with layouts, pinning and
-   move/resize. GNOME Shell integration may require an extension; KDE may require
-   KWin scripts. Do not assume Xwayland can manipulate native Wayland windows.
+3. **Window and input tools:** GNOME 46 extension implements grid placement,
+   pinning, cycling, move/resize and optional shortcuts, tested against native
+   Wayland windows. GNOME drag modifier configuration, shortcut guide, zoom,
+   pointer preferences and a clipboard accent picker are available. Remaining:
+   overlay interactions, general remapping, input-method integration, saved
+   layouts and separately tested KDE/wlroots/X11 backends.
 4. **System tools and network workflows:** displays, themes, host/environment
    editing, sharing input across machines, installer/package formats and distro
    integration. Privileged actions require a separately reviewed backend.
@@ -42,18 +46,18 @@ does not share the Windows JSON/IPC contracts or change their schemas.
 | colorPicker | Screen-color portal and HEX/RGB implemented; history later | 2 |
 | Workspaces | Saved desktop app groups implemented; window restoration later | 2, 3 |
 | previewpane | Nautilus/Dolphin preview integration and thumbnail providers | 2 |
-| fancyzones | Zone editor plus compositor-specific window placement | 3 |
-| alwaysontop | Pin windows through compositor backend | 3 |
-| AltWindowCycle | Window enumeration and cycle through compositor backend | 3 |
+| fancyzones | GNOME grid preview and monitor-aware placement implemented; drag/saved layouts later | 3 |
+| alwaysontop | GNOME pin/unpin implemented, including optional focused-window shortcut | 3 |
+| AltWindowCycle | GNOME active-workspace window cycling implemented; app-group filtering later | 3 |
 | CropAndLock | Capture/preview selected windows through screen-sharing portal | 3 |
-| GrabAndMove | Compositor move/resize actions | 3 |
-| keyboardmanager | GNOME/KDE shortcut tools first; remapping backend review | 3, 4 |
-| poweraccent | Input-method integration for accented character entry | 3 |
-| ShortcutGuide | Desktop shortcut discovery and overlay | 3 |
-| MouseUtils | Accessible cursor effects; overlay and compositor integration | 3 |
+| GrabAndMove | GNOME explicit move/resize and native modifier-drag configuration implemented | 3 |
+| keyboardmanager | Own utility shortcuts configurable; general remapping still requires a backend | 3, 4 |
+| poweraccent | Latin clipboard character picker implemented; input-method integration later | 3 |
+| ShortcutGuide | GNOME configured-shortcut discovery implemented; overlay later | 3 |
+| MouseUtils | GNOME pointer locator and cursor size implemented; overlays/wrapping later | 3 |
 | MeasureTool | Screenshot/overlay measurement with scale-aware coordinates | 3 |
-| ZoomIt | Desktop zoom, annotation and screen-sharing integration | 3 |
-| LightSwitch | GNOME/KDE appearance settings and scheduled theme switch | 4 |
+| ZoomIt | GNOME magnification/crosshairs implemented; annotation/recording later | 3 |
+| LightSwitch | GNOME appearance preference and daily schedule implemented; KDE later | 4 |
 | powerdisplay | GNOME DisplayConfig/KScreen and supported DDC backends | 4 |
 | EnvironmentVariables | Explicit scope for shell/session env; no Windows registry | 4 |
 | Hosts | Preview host edits; privileged writes via reviewed Linux helper | 4 |

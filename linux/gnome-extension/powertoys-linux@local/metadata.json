@@ -1,0 +1,8 @@
+{
+    "uuid": "powertoys-linux@local",
+    "name": "PowerToys for Linux Window Tools",
+    "description": "Window layouts, pinning and cycling for the local PowerToys Linux app",
+    "shell-version": ["46"],
+    "settings-schema": "io.github.powertoys.Linux.WindowTools",
+    "version": 1
+}

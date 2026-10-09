@@ -1,4 +1,4 @@
-# PowerToys for Linux — experimental stages 1–2
+# PowerToys for Linux — experimental native and GNOME tools
 
 This is a native Linux implementation of selected PowerToys workflows inside
 the PowerToys source tree. It is **not an official Microsoft Linux release** or
@@ -20,6 +20,15 @@ This front end keeps its code and installation separate from those components.
 | Color Picker | Wayland-compatible desktop PickColor portal, HEX/RGB and clipboard | Requires a supported desktop portal; no history or global shortcut |
 | New+ | Copy a template file into a chosen folder under a new name | No directory templates or file-manager context action |
 | Workspaces | Save and launch groups of installed desktop applications | No capture/restore of window positions or monitor layouts |
+| FancyZones | Choose a grid up to 6×6, preview zones, snap a selected window to a chosen monitor | GNOME 46 extension required; no drag overlay or saved custom layouts |
+| Always on Top | Pin/unpin selected or focused windows | GNOME 46 extension required |
+| Alt Window Cycle | Cycle all normal windows on the active workspace in stable order | GNOME 46 extension required; no application-group filter |
+| Grab and Move | Position/resize selected windows; choose GNOME's Super/Alt drag modifier | Explicit placement uses extension; drag uses GNOME's native behavior |
+| Light Switch | Light/dark/default preference and daily hour-based schedule | GNOME only; schedule runs while this app is open |
+| ZoomIt | Desktop magnification and magnifier crosshairs | GNOME only; no drawing, annotation or recording |
+| Mouse Utilities | Cursor size and Control-key pointer locator | GNOME only; remaining overlays/wrapping not implemented |
+| Shortcut Guide | Read configured GNOME shortcuts, including custom bindings | No overlay or global hold-to-show shortcut |
+| Quick Accent | Accented Latin character picker with uppercase and clipboard | No hold-to-type or input-method integration |
 
 GNOME Wayland is the primary target. Basic workflows also use GTK's X11 backend.
 Awake's display option prevents the session being marked idle, which can also
@@ -31,6 +40,9 @@ On this Ubuntu PC the required system packages are already installed:
 `python3`, `python3-gi`, `gir1.2-gtk-3.0`, and `gir1.2-gdkpixbuf-2.0`.
 Use **`/usr/bin/python3`**; a pyenv or virtualenv interpreter may not have GI.
 No pip packages or vendored dependencies are required.
+Development checks also use the already installed `node` (Node.js 18+) and
+`glib-compile-schemas`. GNOME 46 and its GJS/Mutter runtime are required only for
+the window extension. No dependency packages are installed by these scripts.
 
 ```sh
 cd linux
@@ -63,6 +75,20 @@ This uses temporary files and temporary workspace configuration, launches
 `/usr/bin/true`, and briefly acquires/releases GNOME suspend/display inhibitors.
 It does not interactively select a screen color; portal request/response
 handling is unit-tested, and color picking is initiated only by the app button.
+Theme, zoom, cursor, drag-modifier and shortcut writes in the desktop test use
+an isolated in-memory GSettings backend, preserving your actual preferences.
+
+For native Wayland window integration, run:
+
+```sh
+./test-window-tools.sh
+```
+
+This starts a separate headless GNOME compositor with two virtual monitors,
+temporary configuration/data/runtime folders, and a private session bus with
+service activation disabled. It tests real GTK Wayland windows through both
+the extension API and native app controls. It does not move your existing
+windows or restart your desktop. Logs are in `build/window-integration.log`.
 
 ## Install for the current user
 
@@ -78,12 +104,59 @@ Look for **PowerToys for Linux** in your application menu. No root access,
 startup entry or desktop shortcut settings are needed. Run installation again
 after updating the source to refresh the snapshot.
 
+## GNOME window tools and global shortcuts
+
+```sh
+./build.sh
+/usr/bin/python3 install.py --gnome-extension
+```
+
+After your next normal login, enable **PowerToys for Linux Window Tools** in
+GNOME Extensions, or run:
+
+```sh
+gnome-extensions enable powertoys-linux@local
+```
+
+Then open the app's **Window tools** page and click **Refresh windows and
+monitors**. Select a window and monitor, set a grid and zone number, and snap,
+pin, activate or move/resize. Application minimum sizes may constrain the
+requested rectangle; Refresh displays the actual result. Leave fullscreen
+before placing a window. Refresh after changing your monitor configuration.
+
+GNOME 46 is the tested/supported extension version. A newly installed extension
+is discovered on login; this installer does not log you out or restart Shell.
+After an extension code update, a new login is also needed to replace cached
+JavaScript. See [GNOME's extension development guide](https://gjs.guide/extensions/development/creating.html).
+
+Optional window shortcuts are **unbound by default**. On the Window tools page,
+read current shortcuts, enter GTK accelerator notation such as
+`<Super><Control>Right`, then save. Bindings need Control, Alt or Super, and the
+app rejects duplicates and conflicts it can discover in GNOME's desktop
+shortcut settings. Other extensions' private bindings may not be discoverable.
+Shortcuts run only while the extension is enabled, and are removed when it is
+disabled. General keyboard remapping is not implemented.
+
+Light Switch, ZoomIt, pointer preferences and the drag modifier explicitly
+change GNOME settings when you apply them; changes persist after the app closes.
+The appearance schedule stops when the app closes and leaves the last applied
+preference in place. Pinning/placement remain native window state after an
+extension is disabled. GNOME's drag gesture uses the chosen modifier plus the
+primary button to move, or the secondary button to resize.
+
 To uninstall, remove these three paths:
 
 ```sh
 rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/powertoys-linux"
 rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/applications/io.github.powertoys.Linux.desktop"
 rm -f "$HOME/.local/bin/powertoys-linux"
+```
+
+If you installed the optional extension, disable it before removing its folder:
+
+```sh
+gnome-extensions disable powertoys-linux@local
+rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/powertoys-linux@local"
 ```
 
 ## File handling limits
