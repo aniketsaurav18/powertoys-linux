@@ -49,7 +49,7 @@ class QuickOcrTests(unittest.TestCase):
     def test_selection_automatically_recognizes_and_copies(self):
         engine = Mock()
         self.app.copy_text = Mock()
-        with patch("powertoys_linux.quick_ocr.ocr.find_engine", return_value=engine), patch("powertoys_linux.quick_ocr.ocr.list_languages", return_value=["eng"]), patch("powertoys_linux.quick_ocr.ScreenshotRequest") as request:
+        with patch("powertoys_linux.quick_ocr.ocr.find_engine", return_value=engine), patch("powertoys_linux.quick_ocr.ocr.list_languages", return_value=["eng"]), patch("powertoys_linux.quick_ocr.RegionRequest") as request:
             self.app.capture()
             self.assertTrue(self.app.busy)
             request.assert_not_called()
@@ -61,6 +61,7 @@ class QuickOcrTests(unittest.TestCase):
                 load.assert_called_once_with(Path("/tmp/selection.png"))
                 self.assertEqual(recognize.call_args[0][1:3], ("eng", "Scattered text"))
             self.app.copy_text.assert_called_once_with("Recognized text")
+            request.return_value.cleanup.assert_called_once()
 
     def test_duplicate_trigger_does_not_start_another_job(self):
         self.app.capture()
@@ -105,7 +106,7 @@ class QuickOcrTests(unittest.TestCase):
         self.assertIn("clipboard", self.app.notify.call_args[0][0])
 
     def test_cancelled_selection_and_engine_failure(self):
-        with patch("powertoys_linux.quick_ocr.ScreenshotRequest") as request, patch("powertoys_linux.quick_ocr.GLib.timeout_add"):
+        with patch("powertoys_linux.quick_ocr.RegionRequest") as request, patch("powertoys_linux.quick_ocr.GLib.timeout_add"):
             self.app.select_screen((Mock(), "eng"))
             request.call_args[0][0](None, "Screenshot capture cancelled.")
             self.assertFalse(self.app.busy)

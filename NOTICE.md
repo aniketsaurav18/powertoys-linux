@@ -28,6 +28,13 @@ No engine, models or native libraries are bundled or downloaded by the app or
 its installer. Consult the distribution packages' copyright files for the
 exact licenses and notices of the installed versions and their dependencies.
 
+Direct drag-to-select OCR uses a separately installed
+[GNOME Screenshot](https://download.gnome.org/sources/gnome-screenshot/) executable
+with its `--area` option. GNOME Screenshot 41 is licensed under GPL-2.0-or-later.
+It runs as an external utility; no GNOME Screenshot code or binaries are bundled
+with PowerToys. Distribution copyright files must be retained with a user-local
+installation. The operating system supplies its GTK and other native libraries.
+
 - Color Picker
 - Command Palette
 - File Explorer Add-ins

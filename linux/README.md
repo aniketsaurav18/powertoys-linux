@@ -18,7 +18,7 @@ This front end keeps its code and installation separate from those components.
 | Peek | UTF-8 text and PNG/JPEG preview | No global shortcut or document/video previews |
 | File Locksmith | Inspect readable process file descriptors by inode | No process termination; no mappings-only detection or elevated access |
 | Color Picker | Wayland-compatible desktop PickColor portal, HEX/RGB and clipboard | Requires a supported desktop portal; no history or global shortcut |
-| Text Extractor | Local Tesseract OCR, PNG/JPEG and screenshot portal input, drag crop, editable text and clipboard; GNOME shortcut for automatic screen-to-clipboard OCR | Optional engine required; native screenshot confirmation; no table reconstruction or click-word extraction |
+| Text Extractor | Local Tesseract OCR, image/screenshot input, editable text and clipboard; GNOME shortcut with fresh drag-to-select and automatic OCR on release | Optional engine and area helper required; no table reconstruction or click-word extraction |
 | New+ | Copy a template file into a chosen folder under a new name | No directory templates or file-manager context action |
 | Workspaces | Save and launch groups of installed desktop applications | No capture/restore of window positions or monitor layouts |
 | FancyZones | Choose a grid up to 6×6, preview zones, snap a selected window to a chosen monitor | GNOME 46 extension required; no drag overlay or saved custom layouts |
@@ -170,9 +170,10 @@ and [image quality guidance](https://tesseract-ocr.github.io/tessdoc/ImproveQual
 ### Screen-to-clipboard shortcut
 
 On this PC, **Super + Shift + T** (Windows key + Shift + T) is registered as a
-GNOME custom shortcut. Press it, select **Area** in GNOME's screenshot overlay,
-drag around the text, then press **Enter** (or click the capture button).
-OCR runs in the background and copies non-empty recognized text automatically.
+GNOME custom shortcut. Press it to get a fresh crosshair, drag around the text,
+then release the mouse. OCR runs in the background and copies non-empty
+recognized text automatically. There is no initial selection box to readjust,
+screenshot toolbar, capture button or Enter confirmation.
 A notification tells you when to paste with **Ctrl + V**. Press **Escape** in
 the selector to cancel. The main PowerToys window need not be open, and no
 window-tools extension or new login is required.
@@ -182,6 +183,18 @@ On another installation, opt in with:
 ```sh
 /usr/bin/python3 install.py --ocr-shortcut
 ```
+
+Direct selection requires the separate `gnome-screenshot` area helper.
+Following dependency approval, install it using your distribution's package
+manager, or extract Ubuntu's `gnome-screenshot` package into
+`${XDG_DATA_HOME:-~/.local/share}/powertoys-linux/region-runtime` and compile
+its `usr/share/glib-2.0/schemas` directory with `glib-compile-schemas --strict`.
+The runtime is installed for this user on the current Ubuntu/GNOME 46 PC and
+uses about 2 MB of disk space (0.8 MB of file data). Its package copyright files
+remain in `usr/share/doc`.
+The app and its installer do not download packages. A system helper on PATH
+takes precedence over the user-local copy. An unavailable helper produces a
+notification rather than reverting to the adjustable screenshot overlay.
 
 The installer checks discoverable shortcut conflicts and preserves other GNOME
 custom bindings. Change or remove the binding on the **Text Extractor** page;
@@ -204,10 +217,12 @@ The helper briefly shows a copying window to obtain Wayland clipboard focus,
 then hides it and restores focus to the previous app. It stays running after
 copying so the text remains available to other applications. **Stop background
 Text Extractor** releases that owner; paste first. There is no login autostart.
-GNOME may save the selected screenshot in Pictures and initially put the image
-on its clipboard; successful OCR replaces it with recognized text. The app
-does not delete desktop-owned screenshots. Empty or failed recognition reports
-a notification and does not copy an empty string.
+Shortcut captures are private temporary files, deleted after loading the image
+and before recognition. They are not saved to Pictures or copied to the
+clipboard as images. Empty or failed recognition reports a notification and
+does not copy an empty string. The separate manual **Capture screen…** button
+continues to use the desktop Screenshot portal and its normal confirmation UI;
+that desktop may save its screenshots, which this app does not delete.
 
 For an isolated Wayland integration check:
 
@@ -216,11 +231,13 @@ For an isolated Wayland integration check:
 ```
 
 This starts a private headless GNOME session with temporary configuration and a
-virtual keyboard. A test portal supplies a selection image; real Tesseract
-recognizes it, a separate GTK process reads the real Wayland clipboard, and
-duplicate/repeated commands and Stop are checked. It leaves your clipboard and
-desktop settings unchanged. It does not simulate physical shortcut presses or
-interactively drag GNOME's real screenshot selector.
+virtual keyboard and pointer. A GTK window displays text; the real GNOME area
+selector receives synthetic press/drag/release events, real Tesseract recognizes
+the captured screen pixels, and a separate GTK process reads the real Wayland
+clipboard. Checks also cover fresh selections, reverse drags, Escape,
+temporary-file deletion, repeated commands and Stop. It leaves your clipboard
+and desktop settings unchanged. Physical shortcut presses and physical monitors
+with different DPI still require separate checks.
 
 ## GNOME window tools and global shortcuts
 

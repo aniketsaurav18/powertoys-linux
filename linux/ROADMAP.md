@@ -17,8 +17,8 @@ implemented. Functionality and remaining differences are listed in README.md.
    README.md. OCR image/capture controls and a local Tesseract adapter are
    implemented, with a user-local engine installed on this PC and real English
    recognition validated. GNOME shortcut-driven capture with automatic
-   background recognition and clipboard delivery is implemented. Interactive
-   capture validation and advanced OCR modes
+   background recognition and clipboard delivery is implemented. Fresh native
+   drag/release selection replaces the generic screenshot overlay. Advanced OCR modes
    such as table reconstruction remain.
    Remaining: file-manager actions, persistent module settings and shortcut
    registration through supported desktop interfaces.

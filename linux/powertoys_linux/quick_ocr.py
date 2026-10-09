@@ -13,7 +13,7 @@ gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, Gio, GLib, Gtk
 
 from . import ocr
-from .desktop import ScreenshotRequest
+from .region_capture import RegionRequest
 
 
 class QuickOcr(Gtk.Application):
@@ -84,6 +84,7 @@ class QuickOcr(Gtk.Application):
         engine, language = engine_language
 
         def selected(path, error):
+            capture = self.request
             self.request = None
             if self.closed:
                 return
@@ -92,12 +93,15 @@ class QuickOcr(Gtk.Application):
                 return
 
             def recognize():
-                image = ocr.load_image(path)
+                try:
+                    image = ocr.load_image(path)
+                finally:
+                    capture.cleanup()
                 return ocr.recognize(image, language, "Scattered text", cancel=self.cancel, engine=engine)
 
             self.submit(recognize, self.copy_text)
 
-        self.request = ScreenshotRequest(selected)
+        self.request = RegionRequest(selected)
 
     def copy_text(self, text):
         if not text:

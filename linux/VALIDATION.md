@@ -6,16 +6,19 @@ system Python 3. All commands below completed with exit code 0.
 | Check | Result |
 | --- | --- |
 | `./build.sh` | Source compilation and runtime imports pass |
-| `./test.sh` | 75 Python tests and 3 JavaScript tests pass, including 4,700 generated input cases and all grid shapes up to 6×6 |
+| `./test.sh` | 82 Python tests and 3 JavaScript tests pass, including 4,900 generated input cases and all grid shapes up to 6×6 |
 | `PYTHONPATH=. /usr/bin/python3 tests/gui_smoke.py` in the graphical session | 18 pages construct; existing file/text/launch workflows pass; theme/schedule, zoom, pointer, drag modifier and shortcut settings roundtrip against an in-memory backend; duplicate bindings rejected; shortcut guide, accent picker and OCR controls construct |
 | `PYTHONPATH=. /usr/bin/python3 tests/ocr_gui.py build/ocr-preview.png` | Background image loading and extraction, drag crop, enabled/disabled controls, editable output and mocked clipboard pass using a CLI test double; widget capture visually inspected |
 | OCR process and file handling | Temporary CLI test executable verifies crop dimensions and command arguments; cancellation and timeout reap processes; engine errors and output limits reported; input image remains unchanged; 700 generated invalid-header/crop cases pass |
 | `PYTHONPATH=. /usr/bin/python3 tests/ocr_integration.py` | Real Tesseract 5.3.4 recognizes clean English multi-line text and a cropped single line; source image remains unchanged |
 | Installed GTK app with real OCR engine | Unique test application instance finds user-local Tesseract, selects English, loads an image asynchronously and displays the recognized text; real widget capture visually inspected; clipboard untouched |
 | OCR engine installation | User-approved, rootless extraction of five Ubuntu packages with SHA-256 verification; English and orientation models plus required libraries; runtime occupies 21,664,987 bytes (about 22 MB); temporary downloads removed; package manifest and copyright files retained |
-| `./test-quick-ocr.sh` | Isolated GNOME Wayland session: portal selection fixture triggers real OCR and automatic clipboard delivery to a separate GTK process; duplicate/repeated invocations use one helper; owner remains alive until Stop; no host clipboard/settings writes |
+| `./test-quick-ocr.sh` | Isolated GNOME Wayland session: real native area selector starts with no rectangle; virtual pointer drag/release captures actual screen pixels without Enter; real Tesseract and a separate GTK clipboard reader verify text delivery; repeated/reversed selections work; Escape preserves previous text; private images are deleted; duplicate commands use one helper, alive until Stop; no host clipboard/settings writes |
+| Area helper installation | User-approved, rootless extraction of Ubuntu GNOME Screenshot 41.0-2build2 with SHA-256 verification and compiled schemas; copyright and package manifest retained; 834,027 bytes of file data, about 2 MB allocated on disk |
+| Area capture handling | Exact area/private-file arguments, missing dependency, cancellation, timeout, child errors and cleanup tested; 200 generated helper-error byte sequences handled without NULs or unbounded messages |
 | OCR shortcut and controller tests | GNOME binding save/update/remove preserves other entries; conflicts with custom and window-tool shortcuts rejected; 300 generated accelerator strings validated; command routing, automatic processing, busy detection, cancellation/errors, focus gating and clipboard lifetime checked |
 | Installed shortcut | `install.py --ocr-shortcut` registers Super+Shift+T for `powertoys-linux --ocr`; all four existing GNOME custom shortcuts verified unchanged; both desktop entries validate; updated installed GUI smoke check passes |
+| Installed selection fix | Ordinary `install.py` updates the snapshot; native area backend and user-local executable verified without capturing the host screen; Super+Shift+T and four other custom shortcuts retained; old OCR helper stopped so the next shortcut starts the updated code |
 | `./test-window-tools.sh` | GNOME 46.0/Mutter 46.2 extension loads in a private headless compositor with two virtual monitors; native Wayland GTK windows snap, pin/unpin, move/resize across monitors and cycle through all windows; GUI window controls pass; invalid zones, off-monitor placement and fullscreen placement are rejected; disable removes the exported object |
 | GNOME session inhibition in the desktop test | Suspend flags = 4; suspend + idle flags = 12; both are removed after Stop |
 | Live file-descriptor inspection | Finds the test process's own open file |
@@ -31,7 +34,7 @@ template names and workspace configuration bytes. These are bounded local
 fuzz tests, not OneFuzz runs or an exhaustive security assessment.
 New cases cover schedule values, backend response strings and zone inputs.
 OCR cases cover malformed image data and scaled, reversed or out-of-bounds
-crop drags. Screenshot request options, local URI checks and response cleanup
+crop drags and area-helper error bytes. Screenshot request options, local URI checks and response cleanup
 are unit-tested with a mock connection.
 The broader desktop GUI test also saves/removes an OCR shortcut against an
 in-memory settings backend.
@@ -46,12 +49,12 @@ and pointer modifier dragging have not been exercised interactively.
 OCR widget captures were visually inspected with both a test engine and the
 installed real engine. Recognition checks cover clean printed English text;
 handwriting, other languages and complex layouts have not been validated.
-Interactive screenshot capture has not been validated yet.
-The shortcut integration uses a test portal selection rather than the native
-GNOME screenshot UI; physical shortcut activation and interactive area dragging
-remain manual checks. A temporary test extension supplies a keyboard to the
-headless compositor and dismisses its startup overview; it is not installed in
-the user's desktop or required by the OCR utility.
+The separate manual Screenshot portal button has not been validated interactively.
+The shortcut integration exercises GNOME's real area selector with virtual
+pointer input; physical shortcut activation and selection on the user's desktop
+remain manual checks. A temporary test extension supplies a keyboard and pointer
+to the headless compositor and dismisses its startup overview; it is not installed
+in the user's desktop or required by the OCR utility.
 Screen-pixel selection itself has
 not been exercised interactively; it requires clicking a pixel in the desktop
 picker. Multi-monitor window placement was tested on two virtual monitors at

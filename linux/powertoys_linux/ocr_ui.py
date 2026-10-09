@@ -65,7 +65,7 @@ class OcrViews:
         scroll.add(self.ocr_text)
         box.pack_start(scroll, True, True, 0)
         self.button(box, "Copy recognized text", self.ocr_copy)
-        label = Gtk.Label(label="Screen-to-clipboard shortcut: select an area, confirm with Enter, then OCR copies the text automatically.", xalign=0)
+        label = Gtk.Label(label="Screen-to-clipboard shortcut: drag around text and release. OCR copies it automatically. Escape cancels selection.", xalign=0)
         label.set_line_wrap(True)
         box.pack_start(label, False, False, 0)
         row = Gtk.Box(spacing=10)
@@ -290,7 +290,7 @@ class OcrViews:
     def ocr_save_shortcut(self):
         binding = OcrShortcut(self.preferences).save(self.ocr_shortcut_entry.get_text())
         self.ocr_shortcut_entry.set_text(binding)
-        self.status.set_text("Screen-to-clipboard shortcut saved. Select an area and press Enter; OCR copies the text automatically.")
+        self.status.set_text("Screen-to-clipboard shortcut saved. Drag around text and release; OCR copies it automatically.")
 
     def ocr_remove_shortcut(self):
         OcrShortcut(self.preferences).remove()
@@ -304,7 +304,7 @@ class OcrViews:
 
     def ocr_quick_capture(self):
         self.ocr_background_command("--ocr")
-        self.status.set_text("Select a screen area and press Enter. Recognized text will be copied automatically.")
+        self.status.set_text("Drag around the screen text and release. Recognized text will be copied automatically.")
 
     def ocr_stop_background(self):
         self.ocr_background_command("--stop-ocr")
